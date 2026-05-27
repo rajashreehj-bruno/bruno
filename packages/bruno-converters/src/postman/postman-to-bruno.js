@@ -474,7 +474,8 @@ const importPostmanV2CollectionItem = (brunoParent, item, { useWorkers = false }
             text: null,
             xml: null,
             formUrlEncoded: [],
-            multipartForm: []
+            multipartForm: [],
+            file: []
           },
           docs: transformDescription(i.request.description)
         }
@@ -594,6 +595,17 @@ const importPostmanV2CollectionItem = (brunoParent, item, { useWorkers = false }
         brunoRequestItem.request.body.graphql = parseGraphQLRequest(i.request.body.graphql);
       }
 
+      if (bodyMode === 'file') {
+        brunoRequestItem.request.body.mode = 'file';
+        brunoRequestItem.request.body.file.push({
+          uid: uuid(),
+          selected: true,
+          filePath: ensureString(i.request.body.file?.src),
+          contentType: 'application/octet-stream'
+        });
+        // brunoRequestItem.request.body.file = ensureString(i.request.body.file);
+      }
+
       each(normalizeHeaders(i.request.header), (header) => {
         if (header.key == null && header.value == null) return;
         brunoRequestItem.request.headers.push({
@@ -668,7 +680,8 @@ const importPostmanV2CollectionItem = (brunoParent, item, { useWorkers = false }
                 text: null,
                 xml: null,
                 formUrlEncoded: [],
-                multipartForm: []
+                multipartForm: [],
+                file: []
               }
             },
             response: {
@@ -781,6 +794,15 @@ const importPostmanV2CollectionItem = (brunoParent, item, { useWorkers = false }
                 example.request.body.text = originalRequest.body.raw;
               }
             }
+          } else if (bodyMode === 'file') {
+            example.request.body.mode = 'file';
+            example.request.body.file.push({
+              uid: uuid(),
+              selected: true,
+              filePath: ensureString(i.request.body.file?.src),
+              contentType: 'application/octet-stream'
+            });
+            // brunoRequestItem.request.body.file = ensureString(i.request.body.file);
           }
 
           // Convert response headers
